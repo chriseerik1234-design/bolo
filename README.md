@@ -32,7 +32,9 @@ and **Bolo Chat**. Uninstall any time from Start Menu → Bolo → Uninstall Bol
 Prefer the files? Download
 [Bolo-Windows.zip](https://github.com/chriseerik1234-design/bolo/releases/latest/download/Bolo-Windows.zip)
 and unzip it anywhere. The source lives at
-[github.com/chriseerik1234-design/bolo](https://github.com/chriseerik1234-design/bolo).
+[github.com/chriseerik1234-design/bolo](https://github.com/chriseerik1234-design/bolo),
+and the friendly download page is
+[chriseerik1234-design.github.io/bolo](https://chriseerik1234-design.github.io/bolo/).
 
 ---
 
