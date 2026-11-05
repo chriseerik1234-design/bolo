@@ -647,5 +647,15 @@ every playground snippet runs.
 - Tree-walking, so roughly 50× slower than Python. Fine for chores.
 
 Natural next steps: a package folder for `use`, more window controls, an
-Estonian translation of the lessons, and a packaged `.exe` for machines without
-Python.
+Estonian translation of the lessons, and signed executables so Windows does not
+warn about the installer.
+
+## License
+
+Bolo is released under the [MIT License](LICENSE). In plain words: use it,
+change it, share it, even in something you sell — just keep the copyright
+notice, and understand that it comes with no warranty.
+
+The name "Bolo" and the project are not trademarked; if you publish a changed
+version, say clearly that it is yours, so people are not confused about where
+it came from.
