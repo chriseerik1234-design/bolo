@@ -181,6 +181,6 @@ if (-not $NoZip) {
     Write-Host "  publish:  $ZipPath"
     Write-Host ""
     Write-Host "Next: put the zip on a web server or a GitHub release, then point"
-    Write-Host "installer\install.ps1 and installer\index.html at it. See"
+    Write-Host "installer\install.ps1 and index.html at it. See"
     Write-Host "installer\README.md for the exact steps." -ForegroundColor Yellow
 }

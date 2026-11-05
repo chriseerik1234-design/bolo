@@ -93,7 +93,7 @@ If you built Bolo yourself, install the local zip instead:
     powershell -ExecutionPolicy Bypass -File installer\install.ps1 -ZipPath installer\Bolo-Windows.zip
 
 If you are publishing Bolo, edit `$Url at the top of installer\install.ps1
-(and the link in installer\index.html) to the real address.
+(and the link in index.html) to the real address.
 "@
         }
         try {

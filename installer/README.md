@@ -90,7 +90,7 @@ gh release create v1.0 installer\Bolo-Windows.zip `
 Then edit the address in **two** places:
 
 1. `installer\install.ps1`, the `$Url` parameter near the top.
-2. `installer\index.html`, the `#one-liner` text.
+2. `index.html` at the repository root, the `#one-liner` text.
 
 Example for a GitHub release:
 
@@ -111,15 +111,19 @@ something wrong. This repository is already published as
 
 ## 4. Host the page
 
-`index.html`, `Bolo-Windows.zip`, and `install.ps1` sitting in the same folder
-is a complete site. Any static host works: GitHub Pages, Netlify, Cloudflare
-Pages, or a plain web server.
+The page is `index.html` at the repository root, and GitHub Pages serves it from
+`main` / root. It is already enabled for this repository:
 
-On GitHub Pages, publish this `installer\` folder (for example by copying its
-three files into a `docs\` folder and enabling Pages for `docs\`).
+```
+https://chriseerik1234-design.github.io/bolo/
+```
 
-The page uses no external fonts, scripts, or analytics. It makes no network
-requests until someone clicks a download.
+Because the download links point at the *latest release*, the page keeps working
+after every new release — no edit and no redeploy needed.
+
+Any static host works too (Netlify, Cloudflare Pages, a plain web server). The
+page uses no external fonts, scripts, or analytics. It makes no network
+requests until someone clicks a download or copies the command.
 
 ## How the installer behaves
 
