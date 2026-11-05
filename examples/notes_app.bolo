@@ -1,0 +1,35 @@
+# notes_app.bolo - open, edit, and save a text file.
+#
+# Run it from a terminal with:
+#   bolo examples\notes_app.bolo
+# or copy the code into App Studio in the learning app.
+
+win = window("Notes", 600, 480)
+heading(win, "Notes")
+
+note = textbox(win, 14)
+
+bar = row(win)
+button(bar, "Open", {
+  file = choose_file("Open a text file")
+  if file is not nothing {
+    set(note, read(file))
+    set(title, name(file))
+  }
+})
+button(bar, "Save", {
+  file = save_file("Save your note")
+  if file is not nothing {
+    write(file, value(note))
+    alert("Saved to " + name(file))
+  }
+})
+button(bar, "Clear", {
+  if ask("Clear the whole note?") {
+    clear(note)
+  }
+})
+button(bar, "Quit", { close(win) })
+
+title = label(win, "No file open")
+show(win)

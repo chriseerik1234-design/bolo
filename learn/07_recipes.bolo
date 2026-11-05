@@ -1,0 +1,68 @@
+# Lesson 7 - teaching the computer a new trick
+#
+# Run:     bolo learn\07_recipes.bolo
+#
+# "to" starts a new trick (programmers call it a *function*).
+# Inside the ( ) you write the names of the values it needs.
+# The last line of the block is the answer it gives back.
+
+to greet(who) {
+  "Hello, " + who + "!"
+}
+
+say(greet("Mari"))
+say(greet("Juku"))
+
+say("")
+
+to double(n) {
+  n * 2
+}
+
+say(double(5))
+say([1, 2, 3] |> map({ double(it) }))
+
+say("")
+
+# Tricks can take more than one value:
+to add(a, b) {
+  a + b
+}
+
+say(add(2, 3))
+
+say("")
+
+# A trick can use "return" to stop early and give an answer:
+to describe_age(age) {
+  if age < 18 {
+    return "young"
+  }
+  "grown up"
+}
+
+say(describe_age(10))
+say(describe_age(30))
+
+say("")
+
+# And a trick can call itself. This is called *recursion*.
+# countdown(3) says 3, then asks countdown(2) to do the rest...
+to countdown(n) {
+  if n is 0 {
+    return "Lift off!"
+  }
+  say(n)
+  countdown(n - 1)
+}
+
+say(countdown(3))
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Write a trick called shout that turns text into capitals:
+#    shout("hello") should give "HELLO".  (Hint: upper)
+# 2. Write a trick called square(n) that returns n * n.
+# 3. Call greet() with no value at all and read the error.
+# ---------------------------------------------------------------

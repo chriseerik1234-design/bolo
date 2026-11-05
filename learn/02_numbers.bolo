@@ -1,0 +1,38 @@
+# Lesson 2 - numbers and text are different things
+#
+# Run:     bolo learn\02_numbers.bolo
+#
+# A useful computer trick: it never gets bored of sums.
+
+say(2 + 3)
+say(10 - 4)
+say(6 * 7)
+say(10 / 4)
+
+# % means "what is left over".
+# 10 divided by 3 is 3 with 1 left over:
+say(10 % 3)
+
+say("")
+# Two pieces of text stick together with +:
+say("bread" + " and " + "cheese")
+
+say("")
+# But text and numbers are different species. This works:
+say("I am " + text(12) + " years old")
+
+# If you uncomment the next line it will fail on purpose.
+# "text" + number does not make sense to the computer.
+# say("I am " + 12)
+#
+# "text" turns a number into text. "number" goes the other way:
+say(1 + number("41"))
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Say your age using text() and +.
+# 2. Change 10 % 3 to 17 % 5. Can you predict the answer first?
+# 3. Uncomment the broken line above (delete the #), run it, and read the
+#    hint at the bottom of the error.
+# ---------------------------------------------------------------

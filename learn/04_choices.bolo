@@ -1,0 +1,57 @@
+# Lesson 4 - making choices
+#
+# Run:     bolo learn\04_choices.bolo
+#
+# "if" asks a yes/no question. If the answer is yes, it runs the block
+# of instructions between { and }.
+
+age = 12
+
+if age < 18 {
+  say("You are young.")
+} else {
+  say("You are grown up.")
+}
+
+say("")
+
+# You can ask about text too. "is" and "is not" read like English:
+weather = "rain"
+
+if weather is "rain" {
+  say("Take an umbrella.")
+}
+
+if weather is not "sun" {
+  say("No sunglasses needed.")
+}
+
+say("")
+
+# Several questions in a row. The first true one wins:
+score = 85
+
+if score > 90 {
+  say("Grade: excellent")
+} else if score > 70 {
+  say("Grade: good")
+} else {
+  say("Grade: keep practising")
+}
+
+say("")
+
+# The comparison words:
+#   is          same as
+#   is not      different from
+#   <           smaller than
+#   >           bigger than
+#   <=  >=      smaller/bigger or equal
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Change age to 20. Which message appears?
+# 2. Make a password check: if password is "swordfish", say "welcome".
+# 3. Ask "if age is 12" instead of "age < 18". What changes?
+# ---------------------------------------------------------------

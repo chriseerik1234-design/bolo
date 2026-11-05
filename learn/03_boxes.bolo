@@ -1,0 +1,33 @@
+# Lesson 3 - boxes with names
+#
+# Run:     bolo learn\03_boxes.bolo
+#
+# A "variable" is a box with a name. You put a value in it, then use the name.
+# The computer remembers it until you change it. This is called *assignment*.
+
+name = "Mari"
+age = 12
+
+say(name)
+say(age)
+say("Hello, " + name + "!")
+
+# Boxes are useful because the box can be used again and changed:
+age = age + 1
+say("One year later, " + name + " is " + text(age))
+
+# Boxes can hold text, numbers, lists, even whole tricks.
+# The name is yours to choose. No spaces, no quotes around it.
+#
+# IMPORTANT: names are case-sensitive.
+# "Age" and "age" are two completely different boxes.
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Make a box called favourite_food and say it.
+# 2. Make a box called price = 2, then a box called count = 3, and say
+#    price * count.
+# 3. Say a name you never created (like "colour") and read the error.
+#    Bolo will offer a guess if it is close to a real name.
+# ---------------------------------------------------------------

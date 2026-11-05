@@ -1,0 +1,44 @@
+# Lesson 6 - doing something for every item
+#
+# Run:     bolo learn\06_repeat.bolo
+#
+# "for" means: take each item, put it in a box, and run the block.
+
+for fruit in ["apple", "pear", "plum"] {
+  say("I like " + fruit)
+}
+
+say("")
+
+# The box only exists inside the loop. That keeps names from colliding.
+
+# A loop over numbers is very common. range(1, 4) gives 1, 2, 3
+# (it stops before the second number, just like list positions).
+for n in range(1, 4) {
+  say(text(n) + " x " + text(n) + " = " + text(n * n))
+}
+
+say("")
+
+# Loops are often how you build up a result:
+total = 0
+
+for n in [3, 7, 2, 8] {
+  total = total + n
+}
+
+say("The total is " + text(total))
+
+# The same thing with a pipeline, once you feel comfortable:
+say([3, 7, 2, 8] |> sum)
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Print the numbers 1 to 10 with a for loop.
+# 2. Print only the even numbers from 1 to 10.
+#    (Hint: inside the loop, use if and %.)
+# 3. Count how many words are in a sentence:
+#    sentence = "the cat sat on the mat"
+#    sentence |> words |> ... ?
+# ---------------------------------------------------------------

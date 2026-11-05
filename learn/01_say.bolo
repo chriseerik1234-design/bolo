@@ -1,0 +1,28 @@
+# Lesson 1 - making the computer talk
+#
+# Run this file with:     bolo learn\01_say.bolo
+#
+# "say" means "show this on the screen".
+# Text goes inside quotes. Numbers do not need quotes.
+
+say("Hello!")
+say("I am a program. I do exactly what these lines tell me.")
+say("")
+say(42)
+say("The answer to 6 times 7 is...")
+say(6 * 7)
+
+# Lines that start with # are notes for humans.
+# The computer skips them completely. So this line does nothing.
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Add a line that says your name.
+#    Copy a line above and change the words inside the quotes.
+#
+# 2. Make the computer say a sum, like 100 + 25.
+#
+# 3. What happens if you delete a quote mark? Run it and read the error.
+#    It is not a disaster - the message tells you what broke.
+# ---------------------------------------------------------------

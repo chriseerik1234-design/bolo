@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get Bolo — a small, friendly programming language</title>
+<style>
+  :root {
+    --paper: #f6f5f1;
+    --panel: #ffffff;
+    --ink: #1d2227;
+    --muted: #6d7178;
+    --accent: #2f6b4f;
+    --accent-dark: #234f3b;
+    --rule: #d8d4ca;
+    --code: #1c2126;
+    --code-fg: #e8e6df;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 17px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 56px 24px 80px; }
+  .tag {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  h1 { font-size: 46px; line-height: 1.1; margin: 12px 0 16px; letter-spacing: -.02em; }
+  h1 span { color: var(--accent); }
+  .lead { font-size: 21px; color: #3c4248; max-width: 620px; }
+  h2 { font-size: 22px; margin: 44px 0 12px; }
+  p { margin: 12px 0; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 26px;
+    margin: 26px 0;
+  }
+  .card h2 { margin-top: 0; }
+  .download {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 14px 24px;
+    border-radius: 10px;
+    margin: 6px 0 4px;
+  }
+  .download:hover { background: var(--accent-dark); }
+  .small { color: var(--muted); font-size: 14px; }
+  .command {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    background: var(--code);
+    color: var(--code-fg);
+    border-radius: 10px;
+    padding: 12px 12px 12px 16px;
+    margin: 14px 0 8px;
+  }
+  .command code {
+    flex: 1;
+    overflow-x: auto;
+    white-space: nowrap;
+    font: 15px/1.5 "Cascadia Mono", Consolas, monospace;
+    padding: 3px 0;
+  }
+  .command button {
+    background: #3a4249;
+    color: #fff;
+    border: 0;
+    border-radius: 7px;
+    padding: 8px 14px;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .command button:hover { background: #4b545c; }
+  ul { padding-left: 22px; }
+  li { margin: 7px 0; }
+  .code {
+    background: var(--code);
+    color: var(--code-fg);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font: 14px/1.65 "Cascadia Mono", Consolas, monospace;
+  }
+  .code .k { color: #8ec7a4; }
+  .code .s { color: #e5c07b; }
+  .code .c { color: #8a949d; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 36px; } }
+  footer {
+    border-top: 1px solid var(--rule);
+    margin-top: 56px;
+    padding-top: 18px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .ok { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="tag">Bolo for Windows</div>
+  <h1>Programming that reads like <span>English</span>.</h1>
+  <p class="lead">
+    Bolo is a small language for everyday file, text, and desktop-app chores.
+    It was made for people who have never programmed — and it is still useful
+    when you have.
+  </p>
+
+  <div class="card">
+    <h2>Install with one command</h2>
+    <p>Open <strong>PowerShell</strong> (press <kbd>Win</kbd>, type
+      <em>PowerShell</em>, press Enter), paste this line, and press Enter:</p>
+
+    <div class="command">
+      <code id="one-liner">irm https://github.com/chriseerik1234-design/bolo/releases/latest/download/install.ps1 | iex</code>
+      <button type="button" onclick="copyCommand()">Copy</button>
+    </div>
+    <p class="small">
+      Windows 10 or 11. No administrator rights. It installs only for you, in
+      <code>%LOCALAPPDATA%\Programs\Bolo</code>, and adds a Start Menu shortcut.
+      Nothing is uploaded.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Or download the zip</h2>
+    <p>Prefer to see the files first? Download, unzip anywhere, and double-click
+      <strong>Bolo Learn.bat</strong>.</p>
+    <a class="download" href="https://github.com/chriseerik1234-design/bolo/releases/latest/download/Bolo-Windows.zip">Download Bolo-Windows.zip</a>
+    <p class="small">Includes the learning app, Bolo Chat, the language, the lessons, and examples.</p>
+  </div>
+
+  <h2>What you get</h2>
+  <div class="grid">
+    <div class="card">
+      <h2 style="font-size:18px">Bolo Learn</h2>
+      <p>A window with 15 short lessons, an editor, Run and Check buttons, a
+        playground, and a searchable reference.</p>
+    </div>
+    <div class="card">
+      <h2 style="font-size:18px">Bolo Chat</h2>
+      <p>A local-AI chatbot that talks about anything, with Bolo as its
+        specialty. Chat mode or code mode, your choice.</p>
+    </div>
+  </div>
+
+  <h2>A taste of the language</h2>
+  <div class="code"><span class="c"># Show every JPEG in a folder</span>
+files(<span class="s">"photos"</span>) |&gt; filter({ ext(it) <span class="k">is</span> <span class="s">"jpg"</span> }) |&gt; each({ say(name(it)) })
+
+<span class="c"># Tables, loops, and values inside text</span>
+person = table(<span class="s">"name"</span>, <span class="s">"Mari"</span>, <span class="s">"age"</span>, 12)
+person[<span class="s">"city"</span>] = <span class="s">"Tartu"</span>
+
+<span class="k">for</span> key, value <span class="k">in</span> pairs(person) {
+  say(<span class="s">"{key} = {value}"</span>)
+}
+</div>
+
+  <h2>Good to know</h2>
+  <ul>
+    <li><span class="ok">No Python needed.</span> The installer includes everything.</li>
+    <li><span class="ok">No account, no cloud.</span> Your code and progress stay on your computer.</li>
+    <li><span class="ok">The AI is optional.</span> Chat and the tutor use
+      <a href="https://ollama.com">Ollama</a> on your own machine. The language
+      and all 15 lessons work without it.</li>
+    <li><span class="ok">Easy to remove.</span> Start Menu &gt; Bolo &gt; Uninstall Bolo.</li>
+  </ul>
+
+  <footer>
+    Bolo is a small language built from scratch: lexer, parser, interpreter,
+    and desktop apps, in plain Python. MIT-style use: read it, change it, share it.
+  </footer>
+</div>
+
+<script>
+  function copyCommand() {
+    const text = document.getElementById("one-liner").textContent.trim();
+    const done = () => {
+      const button = document.querySelector(".command button");
+      button.textContent = "Copied";
+      setTimeout(() => { button.textContent = "Copy"; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const area = document.createElement("textarea");
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+      done();
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+# Lesson 5 - lists, and the word "then"
+#
+# Run:     bolo learn\05_lists.bolo
+#
+# A list holds many values in order, inside [ and ].
+
+fruits = ["apple", "pear", "plum"]
+
+say(fruits)
+say("")
+
+# Count from 0, not from 1. This surprises everyone at first.
+say(fruits[0])
+say(fruits[1])
+say(fruits[-1])        # -1 means "the last one"
+
+say("")
+say("How many?")
+say(length(fruits))
+say(length("hello"))   # text has a length too
+
+say("")
+# Now the clever part.  |>  means "THEN do this with the thing on the left".
+#   fruits |> length        is the same as        length(fruits)
+say(fruits |> length)
+say(fruits |> join(" + "))
+
+say("")
+# each means "do something with every item".
+# { ... } is a small recipe. "it" is the item being handled right now.
+fruits |> each({ say("I like " + it) })
+
+say("")
+# filter keeps only the items where the recipe says true.
+numbers = [1, 2, 3, 4, 5, 6]
+numbers |> filter({ it % 2 is 0 }) |> say
+
+# map changes every item.
+numbers |> map({ it * 10 }) |> say
+
+# Pipelines can span several lines. Read them top to bottom:
+numbers
+  |> filter({ it > 2 })
+  |> map({ it * 100 })
+  |> say
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Add "banana" to the list and say its length.
+# 2. Make a list of your three favourite numbers. Say only the ones
+#    bigger than 10 using filter.
+# 3. Say the first item of an empty list, [][0], and read the error.
+# ---------------------------------------------------------------

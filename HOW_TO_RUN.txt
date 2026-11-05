@@ -1,0 +1,93 @@
+HOW TO USE BOLO  (no terminal, no commands)
+=============================================
+
+Bolo is said "BOH-loh".
+
+Everything happens by double-clicking.
+
+  BOLO - Learn Bolo.bat        <-- START HERE
+      Opens the learning app: a proper window with a code editor.
+
+      It has 15 short lessons that start from nothing. Read the lesson
+      at the top, type your answer in the box, press Run. Then press
+      Check - it tells you whether the task is really done, and what is
+      still missing. Lesson 15 builds a real desktop app.
+
+      Stuck? "Show answer" loads a working answer.
+      Curious? "Playground" runs code in one live session, so the names
+      you make stay around.
+      Making an app? "App Studio" opens your program as a real window,
+      with five templates ready to try: Hello, Greeter, Tip calculator,
+      Notes and Clock.
+      Want a helper? "Ask the tutor" uses a local AI (Ollama) that knows
+      Bolo and can see the lesson and your code. Nothing leaves your
+      computer.
+      Forgotten a word? "Reference" lists every builtin and every piece
+      of syntax, with a search box.
+
+      Your progress and your code are saved automatically, so you can
+      close the app and carry on later.
+
+      The app does its file lessons inside app_sandbox\ and clears that
+      folder before each run. It cannot touch your real documents.
+
+  BOLO - Chat With AI.bat
+      A separate app for talking with the local AI. Chat on the left,
+      code on the right.
+
+      It is a real chatbot: ask about anything. It also knows Bolo very
+      well. Switch the mode at the top to "Bolo code" when you want a
+      complete Bolo program. Press "Write a program" (or just type a
+      request) and Ask. Then press "Use code from answer" to move the
+      program into the editor.
+      "Check" finds syntax problems without running anything. "Run" starts
+      the program in coder_sandbox\ and shows its output. Window programs
+      open normally; press Stop to close one.
+      "Open" and "Save" work with ordinary .bolo files.
+
+      Chat mode uses the bolo-chat model; code mode uses bolo-coder.
+      It talks only to Ollama on this computer. Nothing is sent to the
+      internet.
+
+  START - Type Code Live.bat
+      A quick live prompt for experiments outside the app.
+      Try:   say("hello")
+      Leave with:  quit
+
+  LESSON 1 ... LESSON 8
+      The same course in plain files, for reading outside the app.
+      Each one runs one lesson and shows its output. Then press any
+      key: the lesson opens in Notepad so you can change it. Save,
+      close Notepad, double-click the same lesson again to see what
+      your change did.
+
+  RUN - My Challenge.bat
+      After the 8 lessons. Runs learn\challenges\myjob.bolo, then opens
+      it in Notepad. The six real jobs are described in
+      learn\challenges\README.md, with sample data ready to use.
+
+What is in this folder
+----------------------
+
+  BOLO - Learn Bolo.bat   starts the learning app. Start here.
+  BOLO - Chat With AI.bat starts the separate AI chat and coding app.
+  bolo_app.py             the learning app. You never edit this.
+  bolo_chat.py            the AI chat app. You never edit this.
+  bolo_gui.py             desktop windows for Bolo. You never edit this.
+  bolo_ai.py              the local AI connection. You never edit this.
+  bolo.py                 the engine (Python). You never edit this.
+  bolo.cmd                starts the engine from a terminal.
+  learn\                  the eight plain-file lessons and the challenges.
+  examples\               finished programs to look at, including two apps.
+  ollama\                 the recipes for the local Bolo models.
+  tests\                  174 automatic checks that Bolo and the apps work.
+  README.md               the full language reference, for later.
+
+  installer\              builds a downloadable Bolo for other computers.
+  app_sandbox\            created by the app; its safe practice folder.
+  coder_sandbox\          created by Bolo Chat; where it runs programs.
+  bolo_progress.json      created by the app; your progress and code.
+
+The lesson files are plain text. Notepad is perfect.
+If Windows opens them in something odd instead: right-click the file,
+choose "Open with", then Notepad.

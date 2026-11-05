@@ -1,0 +1,63 @@
+# Lesson 8 - a real job: files on your disk
+#
+# Run:     bolo learn\08_real_job.bolo
+#
+# Everything so far was practice. This lesson touches real files.
+# It creates a small folder called learn/sandbox next to this lesson.
+# Deleting that folder afterwards is safe.
+
+folder = "learn/sandbox"
+
+# Make the folder (it is fine if it already exists).
+mkdir(folder)
+
+# write(path, text) puts text into a file.
+write(path(folder, "shopping.txt"), "milk\nbread\ncheese")
+write(path(folder, "ideas.txt"), "learn Bolo\nbuild something")
+write(path(folder, "photo.jpg"), "pretend this is a photo")
+
+say("Everything in the folder:")
+files(folder) |> each({ say("  " + name(it)) })
+
+say("")
+say("Only the text files:")
+files(folder)
+  |> filter({ ext(it) is "txt" })
+  |> each({ say("  " + name(it)) })
+
+say("")
+say("Contents of shopping.txt:")
+say(read(path(folder, "shopping.txt")))
+
+say("")
+say("How many words are in ideas.txt?")
+read(path(folder, "ideas.txt")) |> words |> length |> say
+
+say("")
+# A last pipeline: every text file, every line, all together.
+say("The first line of each text file:")
+
+files(folder)
+  |> filter({ ext(it) is "txt" })
+  |> each({
+      say("  " + name(it) + ": " + first(lines(read(it))))
+  })
+
+# Words used above:
+#   mkdir, write, read      make a folder / write a file / read a file
+#   files                   list the files in a folder
+#   path(a, b)              join two parts of a path safely
+#   name(p), ext(p), stem(p) pieces of a file name
+#   lines(text)             split text into a list of lines
+#   first(list)             the first item
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Add a fourth file and run it again. (Running twice is safe.)
+# 2. Count how many files have the extension "txt".
+# 3. Make a folder called learn\sandbox\old and MOVE the jpg into it
+#    with move(path(folder, "photo.jpg"), path(folder, "old", "photo.jpg")).
+#    Remember mkdir for the "old" folder first.
+# 4. Delete the sandbox when you are done: delete(folder)
+# ---------------------------------------------------------------

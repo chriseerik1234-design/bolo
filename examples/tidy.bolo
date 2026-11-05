@@ -1,0 +1,61 @@
+# tidy.bolo - sort one folder into subfolders by file type.
+#
+# Dry run (safe, prints a plan):
+#     bolo examples/tidy.bolo C:\Users\Kasutaja\Downloads
+#
+# Actually move things:
+#     bolo examples/tidy.bolo C:\Users\Kasutaja\Downloads --go
+
+folder = args |> first
+if folder == nil { folder = "." }
+go = args |> contains("--go")
+
+to bucket(extension) {
+  if ["jpg", "jpeg", "png", "gif", "webp"] |> contains(extension) {
+    return "images"
+  }
+  if ["txt", "md", "log", "csv"] |> contains(extension) {
+    return "text"
+  }
+  if ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"] |> contains(extension) {
+    return "docs"
+  }
+  if ["mp3", "wav", "flac", "ogg"] |> contains(extension) {
+    return "audio"
+  }
+  if ["zip", "7z", "rar", "gz"] |> contains(extension) {
+    return "archives"
+  }
+  "other"
+}
+
+to describe(file) {
+  name(file) + "  ->  " + bucket(lower(ext(file))) + "/"
+}
+
+if isdir(folder) {
+  say("folder:", folder)
+  say("files:", files(folder) |> count)
+  say("")
+
+  files(folder)
+    |> filter({ ext(it) != "" })
+    |> sort
+    |> each({
+        kind = bucket(lower(ext(it)))
+        if go {
+          mkdir(path(folder, kind))
+          move(it, path(folder, kind, name(it)))
+          say("moved   ", describe(it))
+        } else {
+          say("would be", describe(it))
+        }
+      })
+
+  if go == false {
+    say("")
+    say("Nothing was moved. Add --go to do it.")
+  }
+} else {
+  say("not a folder:", folder)
+}

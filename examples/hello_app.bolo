@@ -1,0 +1,25 @@
+# hello_app.bolo - a tiny desktop app.
+#
+# Run it from a terminal with:
+#   bolo examples\hello_app.bolo
+# or copy the code into App Studio in the learning app.
+
+win = window("Hello from Bolo", 480, 320)
+heading(win, "Hello!")
+label(win, "This is a real desktop window, made with Bolo.")
+
+name = input(win)
+message = label(win, "")
+
+button(win, "Greet", {
+  if value(name) is "" {
+    set(message, "Type your name first.")
+  } else {
+    set(message, "Hello, " + value(name) + "!")
+  }
+})
+
+bar = row(win)
+button(bar, "Close", { close(win) })
+
+show(win)

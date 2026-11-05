@@ -1,0 +1,10 @@
+2026-11-01 08:00:01 INFO  server starting
+2026-11-01 08:00:02 INFO  loaded 14 settings
+2026-11-01 08:01:10 WARNING slow response from database
+2026-11-01 08:03:44 INFO  user mari signed in
+2026-11-01 09:14:22 ERROR disk full
+2026-11-01 09:14:23 ERROR could not write log file
+2026-11-01 09:20:00 INFO  user juku signed in
+2026-11-01 09:31:07 WARNING retrying request
+2026-11-01 10:02:15 ERROR disk full
+2026-11-01 10:02:16 INFO  server stopping

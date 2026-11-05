@@ -1,0 +1,18 @@
+# Your workspace for the challenges in README.md
+#
+# Double-click "RUN - My Challenge.bat" in the main folder to run this file.
+# It runs, then opens this file in Notepad so you can change it.
+#
+# Start with challenge 1, then work down the list. The comment below is a
+# working starting point, not a finished answer.
+
+content = read("learn/challenges/sample_notes.txt")
+
+say("lines: " + text(length(lines(content))))
+say("words: " + text(length(words(content))))
+say("chars: " + text(length(content)))
+
+# Now try it yourself:
+#   - challenge 2: the longest word.  (sortby + length)
+#   - challenge 3: write a cleaned copy.  (unique + join + write)
+#   - challenge 4: count ERROR lines in app.log.  (filter + contains)
