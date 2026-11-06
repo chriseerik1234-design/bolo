@@ -7,6 +7,7 @@ import io
 import os
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -57,6 +58,24 @@ class Text(unittest.TestCase):
 
     def test_escapes(self):
         self.assertEqual(run(r'"a\tb\nc"'), "a\tb\nc")
+
+    def test_a_backslash_that_is_not_an_escape_stays_put(self):
+        self.assertEqual(run(r'"\d+"'), "\\d+")
+
+    def test_windows_paths_keep_their_separators(self):
+        self.assertEqual(
+            run(r'"C:\Users\Cli\Documents\a.txt"'),
+            "C:\\Users\\Cli\\Documents\\a.txt",
+        )
+        self.assertEqual(run(r'"C:\Users\Cli\a.txt"'), "C:\\Users\\Cli\\a.txt")
+
+    def test_a_doubled_backslash_is_still_one_backslash(self):
+        self.assertEqual(run(r'"a\\b"'), "a\\b")
+
+    def test_regular_expressions_need_no_doubling(self):
+        self.assertEqual(run(r'find("a1 b22", "\d+")'), ["1", "22"])
+        self.assertEqual(run(r'"a1" |> test("\d")'), True)
+        self.assertEqual(run(r'find("one two", "\b\w+\b") |> count'), 2)
 
     def test_single_quotes(self):
         self.assertEqual(run("'hi'"), "hi")
@@ -296,6 +315,46 @@ class Files(unittest.TestCase):
         self.assertEqual(run('"photos/2024/a.jpg" |> stem'), "a")
         self.assertEqual(run('"photos/2024/a.jpg" |> ext'), "jpg")
         self.assertEqual(run('"photos/2024/a.jpg" |> parent'), "photos/2024")
+
+    def test_size_counts_bytes(self):
+        target = self.path("data.txt").replace("\\", "/")
+        with open(target, "w", encoding="utf-8") as handle:
+            handle.write("hello")
+        self.assertEqual(run(f'size("{target}")'), 5)
+
+    def test_size_of_a_folder_explains_itself(self):
+        folder = self.dir.replace("\\", "/")
+        with self.assertRaises(BoloError) as caught:
+            run(f'size("{folder}")')
+        self.assertIn("folder", str(caught.exception))
+        self.assertIn("sum", str(caught.exception))
+
+    def test_size_of_a_missing_file_is_a_bolo_error(self):
+        with self.assertRaises(BoloError) as caught:
+            run(f'size("{self.path("gone.txt")}")')
+        self.assertIn("size:", str(caught.exception))
+
+    def test_modified_is_sortable_text(self):
+        target = self.path("old.txt").replace("\\", "/")
+        with open(target, "w", encoding="utf-8") as handle:
+            handle.write("x")
+        os.utime(target, (1_700_000_000, 1_700_000_000))
+        stamp = run(f'modified("{target}")')
+        self.assertRegex(stamp, r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$")
+        self.assertEqual(
+            stamp, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(1_700_000_000))
+        )
+
+    def test_size_sorts_the_biggest_files_first(self):
+        for name, text in (("small.txt", "a"), ("big.txt", "a" * 100)):
+            with open(self.path(name), "w", encoding="utf-8") as handle:
+                handle.write(text)
+        folder = self.dir.replace("\\", "/")
+        src = (
+            f'files("{folder}") |> sortby({{ size(it) }}) |> reverse '
+            f'|> map({{ name(it) }}) |> first'
+        )
+        self.assertEqual(run(src), "big.txt")
 
     def test_walk_finds_nested_files(self):
         os.makedirs(self.path("sub"))
@@ -699,6 +758,36 @@ class UseFiles(unittest.TestCase):
             bolo.run_file(main)
         self.assertIn("can't open", str(caught.exception))
 
+    def test_an_error_in_a_used_file_points_at_that_file(self):
+        from bolo import format_error
+
+        self.write("tools.bolo", 'to greet(who) {\n  1 + who\n}\n')
+        main = self.write("main.bolo", 'use "tools.bolo"\nsay(greet("Mari"))\n')
+        with self.assertRaises(BoloError) as caught:
+            bolo.run_file(main)
+        err = caught.exception
+        self.assertEqual(err.file, "tools.bolo")
+        self.assertEqual(err.line, 2)
+
+        text = format_error('say("before")\n', "main.bolo", err)
+        self.assertIn("bolo: tools.bolo: line 2", text)
+        self.assertIn("1 + who", text)
+        self.assertNotIn("say(\"before\")", text)
+
+    def test_a_syntax_error_in_a_used_file_names_that_file(self):
+        self.write("tools.bolo", "to greet(who) { who +\n")
+        main = self.write("main.bolo", 'use "tools.bolo"\nsay("before")\n')
+        with self.assertRaises(BoloError) as caught:
+            bolo.run_file(main)
+        self.assertEqual(caught.exception.file, "tools.bolo")
+
+    def test_the_outer_file_keeps_its_own_errors(self):
+        self.write("tools.bolo", "answer = 7\n")
+        main = self.write("main.bolo", 'use "tools.bolo"\nsay(answer + "x")\n')
+        with self.assertRaises(BoloError) as caught:
+            bolo.run_file(main)
+        self.assertIsNone(caught.exception.file)
+
 
 class MoreBuiltins(unittest.TestCase):
     def test_rounding(self):
@@ -758,6 +847,29 @@ class MoreBuiltins(unittest.TestCase):
 
     def test_insert_does_not_change_the_old_list(self):
         self.assertEqual(run("xs = [1]\ninsert(xs, 0, 0)\nxs"), [1])
+
+    def test_sort_refuses_to_mix_true_false_with_numbers(self):
+        with self.assertRaises(BoloError) as caught:
+            run("sort([true, 1, false, 0])")
+        message = str(caught.exception)
+        self.assertIn("one kind", message)
+        self.assertIn("true/false", message)
+
+    def test_sort_of_true_false_on_its_own_is_fine(self):
+        self.assertEqual(run("sort([true, false, true])"), [False, True, True])
+
+    def test_sortby_refuses_to_mix_kinds(self):
+        with self.assertRaises(BoloError) as caught:
+            run('sortby([1, 2], { if it is 1 { "one" } else { it } })')
+        self.assertIn("sortby", str(caught.exception))
+
+    def test_sortby_keeps_equal_keys_in_order(self):
+        src = (
+            'people = [table("n", "b", "age", 30), table("n", "a", "age", 30), '
+            'table("n", "c", "age", 20)]\n'
+            'people |> sortby({ it["age"] }) |> map({ it["n"] })'
+        )
+        self.assertEqual(run(src), ["c", "b", "a"])
 
     def test_json_round_trip(self):
         src = 'data = json("{\\"name\\": \\"Mari\\", \\"tags\\": [1, 2]}")\ndata["name"]'

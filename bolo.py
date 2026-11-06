@@ -81,15 +81,20 @@ class BoloError(Exception):
     """A Bolo problem, explained in plain words.
 
     `line` and `col` point at the source, `hint` is an optional nudge for
-    beginners ("did you mean ...?").
+    beginners ("did you mean ...?"), and `file`/`source` name the file the
+    problem really happened in, when that is not the program being run
+    (a file pulled in with `use`).
     """
 
     def __init__(self, message: str, line: int | None = None,
-                 col: int | None = None, hint: str | None = None):
+                 col: int | None = None, hint: str | None = None,
+                 file: str | None = None, source: str | None = None):
         self.message = message
         self.line = line
         self.col = col
         self.hint = hint
+        self.file = file
+        self.source = source
         super().__init__(message)
 
     def __str__(self) -> str:
@@ -101,7 +106,17 @@ class BoloError(Exception):
 
 
 def format_error(source: str, label: str, err: BoloError) -> str:
-    """Turn an error plus its source into something a beginner can read."""
+    """Turn an error plus its source into something a beginner can read.
+
+    When the problem happened inside a file that was pulled in with `use`,
+    the error carries that file's name and text, so the caret lands on the
+    line that really failed instead of pointing at innocent code in the
+    program that used it.
+    """
+    if err.source is not None:
+        source = err.source
+    if err.file:
+        label = err.file
     out = [f"bolo: {label}" + (f": line {err.line}" if err.line else "")]
     if err.line:
         lines = source.splitlines()
@@ -128,6 +143,15 @@ KEYWORDS = {
 }
 TWO_CHAR_OPS = {"|>", "==", "!=", "<=", ">=", "->"}
 ONE_CHAR_OPS = set("+-*/%<>=()[]{},;")
+
+# The only escapes a backslash introduces inside text. Any other backslash
+# stays where it is, so a regex like "\d+" or a Windows path like
+# "C:\Users\me" arrives exactly as it was typed instead of losing its
+# backslashes (which used to turn "\d+" into "d+" and "C:\Users" into
+# "C:Users").
+ESCAPES = {
+    "n": "\n", "t": "\t", "r": "\r", "\\": "\\", '"': '"', "'": "'",
+}
 
 
 @dataclass
@@ -195,11 +219,14 @@ def tokenize(source: str) -> list[Token]:
                     raise BoloError("unterminated string", line)
                 if source[j] == "\\" and j + 1 < n:
                     esc = source[j + 1]
-                    buf.append({
-                        "n": "\n", "t": "\t", "r": "\r",
-                        "\\": "\\", '"': '"', "'": "'",
-                    }.get(esc, esc))
-                    j += 2
+                    if esc in ESCAPES:
+                        buf.append(ESCAPES[esc])
+                        j += 2
+                        continue
+                    # Not an escape, just a backslash the person meant to
+                    # keep: "\d+" is a regex and "C:\Users" is a path.
+                    buf.append("\\")
+                    j += 1
                     continue
                 buf.append(source[j])
                 j += 1
@@ -1031,6 +1058,10 @@ class UserFunction:
     params: list[str]
     body: list
     env: Env
+    # Where this function was written. Errors raised inside it belong to
+    # that file, even when the call happens much later in another one.
+    file: str | None = None
+    source: str | None = None
 
 
 @dataclass
@@ -1530,7 +1561,9 @@ def _count(interp, args):
         return len(value)
     if isinstance(value, Table):
         return len(value.data)
-    raise BoloError(f"needs a list, text or table, got {describe_type(value)}")
+    raise BoloError(
+        f"length needs a list, text or table, got {describe_type(value)}"
+    )
 
 
 @builtin("first")
@@ -1567,11 +1600,38 @@ def _skip(interp, args):
     return subject[n:]
 
 
+def _one_kind(items: list, name: str) -> None:
+    """Say no when a sort mixes numbers with text or true/false.
+
+    `sort([true, 1])` used to work by accident (Python ranks true as 1), which
+    quietly disagreed with the rest of the language: comparing a boolean with
+    a number is an error everywhere else.
+    """
+    kinds = set()
+    for item in items:
+        if isinstance(item, bool):
+            kinds.add("true/false")
+        elif isinstance(item, (int, float)):
+            kinds.add("numbers")
+        elif isinstance(item, str):
+            kinds.add("text")
+        else:
+            kinds.add(type_name(item))
+    if len(kinds) > 1:
+        raise BoloError(
+            f"{name} can only sort one kind of value, but this list mixes "
+            + " and ".join(sorted(kinds)),
+            hint="use text(x) or number(x) so every value is the same kind",
+        )
+
+
 @builtin("sort")
 def _sort(interp, args):
     _check(args, 1, 1, "sort")
+    items = _list(args[0], "sort")
+    _one_kind(items, "sort")
     try:
-        return sorted(_list(args[0], "sort"))
+        return sorted(items)
     except TypeError:
         raise BoloError("sort: the list mixes types that cannot be compared") from None
 
@@ -1581,10 +1641,14 @@ def _sortby(interp, args):
     _check(args, 2, 2, "sortby")
     items = _list(args[0], "sortby")
     fn = _fn(args[1], "sortby")
+    keys = [interp.call_value(fn, [item]) for item in items]
+    _one_kind(keys, "sortby")
+    pairs = list(zip(keys, items))
     try:
-        return sorted(items, key=lambda item: interp.call_value(fn, [item]))
+        pairs.sort(key=lambda pair: pair[0])
     except TypeError:
         raise BoloError("sortby: the keys cannot be compared") from None
+    return [item for _, item in pairs]
 
 
 @builtin("reverse")
@@ -1855,6 +1919,34 @@ def _isfile(interp, args):
 def _isdir(interp, args):
     _check(args, 1, 1, "isdir")
     return os.path.isdir(_str(args[0], "isdir"))
+
+
+@builtin("size")
+def _size(interp, args):
+    """size(p) - how many bytes a file holds."""
+    _check(args, 1, 1, "size")
+    path = _str(args[0], "size")
+    if os.path.isdir(path):
+        raise BoloError(
+            f"size: {path} is a folder, and a folder has no single size",
+            hint="add the files up:  files(path) |> map({ size(it) }) |> sum",
+        )
+    try:
+        return os.path.getsize(path)
+    except OSError as exc:
+        raise BoloError(f"size: {exc}") from None
+
+
+@builtin("modified")
+def _modified(interp, args):
+    """modified(p) - when the file last changed, like 2026-11-05 14:03:22."""
+    _check(args, 1, 1, "modified")
+    path = _str(args[0], "modified")
+    try:
+        stamp = os.path.getmtime(path)
+    except OSError as exc:
+        raise BoloError(f"modified: {exc}") from None
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stamp))
 
 
 # -- numbers, time and chance ----------------------------------------------
@@ -2294,6 +2386,10 @@ class Interp:
         self.base_dir = Path.cwd()
         self.loaded: set[str] = set()
         self.exit_code = 0
+        # Which file is running right now, so an error can name it (and so a
+        # function remembers the file it was written in).
+        self.file_label: str | None = None
+        self.source_text: str | None = None
 
     # -- statements ---------------------------------------------------------
     def run(self, program: Program):
@@ -2345,7 +2441,10 @@ class Interp:
                     err.line, err.col = node.line, node.col
                 raise
         if isinstance(node, FuncDef):
-            fn = UserFunction(node.name, node.params, node.body, env)
+            fn = UserFunction(
+                node.name, node.params, node.body, env,
+                file=self.file_label, source=self.source_text,
+            )
             env.define(node.name, fn)
             return fn
         if isinstance(node, For):
@@ -2437,15 +2536,28 @@ class Interp:
             program = parse(source)
         except BoloError as err:
             raise BoloError(
-                f"in {path.name}: {err.message}",
-                err.line, err.col, err.hint,
+                err.message, err.line, err.col, err.hint,
+                file=path.name, source=source,
             ) from None
         previous = getattr(self, "base_dir", Path.cwd())
+        previous_label = self.file_label
+        previous_source = self.source_text
         self.base_dir = path.parent
+        self.file_label = path.name
+        self.source_text = source
         try:
             return self.exec_block(program.stmts, env)
+        except BoloError as err:
+            # Top-level code in a used file fails in that file. The first
+            # stamp wins, so the innermost file keeps the blame.
+            if err.file is None:
+                err.file = path.name
+                err.source = source
+            raise
         finally:
             self.base_dir = previous
+            self.file_label = previous_label
+            self.source_text = previous_source
 
     # -- expressions --------------------------------------------------------
     def eval(self, node, env: Env):
@@ -2462,7 +2574,10 @@ class Interp:
         if isinstance(node, ListLit):
             return [self.eval(item, env) for item in node.items]
         if isinstance(node, Lambda):
-            return UserFunction("<lambda>", node.params, node.body, env)
+            return UserFunction(
+                "<lambda>", node.params, node.body, env,
+                file=self.file_label, source=self.source_text,
+            )
         if isinstance(node, If):
             if truthy(self.eval(node.cond, env)):
                 return self.exec_block(node.then, env)
@@ -2633,6 +2748,12 @@ class Interp:
                 return self.exec_block(fn.body, local)
             except ReturnSignal as signal:
                 return signal.value
+            except BoloError as err:
+                # A function written in another file fails in that file.
+                if err.file is None and fn.file:
+                    err.file = fn.file
+                    err.source = fn.source
+                raise
 
         raise BoloError(
             f"{describe_type(fn)} is not a function, so it can't be called",
@@ -2720,19 +2841,25 @@ def repl() -> int:
         buffer = ""
 
 
-def run_source(source: str, argv: list[str] | None = None, base_dir=None):
+def run_source(source: str, argv: list[str] | None = None, base_dir=None,
+               label: str | None = None):
     """Parse and run Bolo source. Returns the value of the last statement."""
     interp = Interp()
     if base_dir is not None:
         interp.base_dir = Path(base_dir)
+    interp.file_label = label
+    interp.source_text = source
     interp.globals.define("args", list(argv or []))
     return interp.run(parse(source))
 
 
 def run_file(path: str, argv: list[str] | None = None):
-    with open(path, encoding="utf-8-sig") as handle:
+    target = Path(path)
+    with open(target, encoding="utf-8-sig") as handle:
         source = handle.read()
-    return run_source(source, argv, base_dir=Path(path).resolve().parent)
+    return run_source(
+        source, argv, base_dir=target.resolve().parent, label=target.name,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -2768,6 +2895,8 @@ def main(argv: list[str] | None = None) -> int:
 
     interp = Interp()
     interp.base_dir = base_dir
+    interp.file_label = label
+    interp.source_text = source
     interp.globals.define("args", script_args)
     try:
         interp.run(parse(source))

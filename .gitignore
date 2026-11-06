@@ -9,6 +9,9 @@ coder_sandbox/
 bolo_progress.json
 bolo_crash.txt
 tasks.json
+# Left behind by running the shipped lessons and examples
+learn/sandbox/
+out/
 
 # Installer build output (rebuild with installer/build.ps1)
 installer/.build/
