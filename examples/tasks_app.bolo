@@ -1,0 +1,188 @@
+# tasks_app.bolo - a small to-do app, written entirely in Bolo.
+#
+# Run it from a terminal:
+#   bolo examples\tasks_app.bolo
+# or double-click "BOLO - Tasks.bat".
+#
+# Your list is saved to tasks.json in the folder you run it from, so it is
+# still there the next time you open the app. Nothing leaves this computer.
+
+# --- where the list lives ----------------------------------------------
+# tasks[3]  is the words of task 3.
+# flags[3]  is true once task 3 is done.
+# state["next"] is the number the next new task will get.
+tasks = table()
+flags = table()
+state = table("next", 1)
+saved = "tasks.json"
+
+
+# --- helpers that only read --------------------------------------------
+
+to task_line(id, words, is_done) {
+  mark = "[ ]"
+  if is_done { mark = "[x]" }
+  mark + "  " + pad(text(id), 3) + words
+}
+
+to list_text() {
+  out = ""
+  for id in sort(keys(tasks)) {
+    out = out + task_line(id, tasks[id], get(flags, id, false)) + "\n"
+  }
+  if out is "" {
+    return "No tasks yet.\n\nType one in the box above, then press Add task."
+  }
+  out
+}
+
+to open_count() {
+  n = 0
+  for id in keys(tasks) {
+    if not get(flags, id, false) { n = n + 1 }
+  }
+  n
+}
+
+to summary() {
+  total = length(tasks)
+  if total is 0 { return "Your list is empty." }
+  left = open_count()
+  text(left) + " open  -  " + text(total - left) + " done  -  " +
+    text(total) + " in all"
+}
+
+
+# --- saving and loading -------------------------------------------------
+
+to save_tasks() {
+  try {
+    write(saved, to_json(table("tasks", tasks, "flags", flags, "next", state["next"])))
+    set(note, "Saved " + now())
+  } catch problem {
+    set(note, "Could not save: " + problem)
+  }
+}
+
+to load_tasks() {
+  if not exists(saved) { return }
+  try {
+    loaded = json(read(saved))
+    for key in keys(get(loaded, "tasks", table())) {
+      tasks[number(key)] = loaded["tasks"][key]
+    }
+    for key in keys(get(loaded, "flags", table())) {
+      flags[number(key)] = loaded["flags"][key]
+    }
+    state["next"] = get(loaded, "next", length(tasks) + 1)
+    set(note, "Loaded " + text(length(tasks)) + " task(s) from " + saved)
+  } catch problem {
+    set(note, "Could not read " + saved + ": " + problem)
+  }
+}
+
+
+# --- the actions the buttons use ---------------------------------------
+
+to refresh() {
+  set(list_box, list_text())
+  set(status, summary())
+}
+
+to add_task() {
+  words = trim(value(entry))
+  if words is "" {
+    set(note, "Type a task first, then press Add task.")
+    return
+  }
+  id = state["next"]
+  tasks[id] = words
+  flags[id] = false
+  state["next"] = id + 1
+  set(entry, "")
+  refresh()
+  save_tasks()
+  set(note, "Added task " + text(id) + ".")
+}
+
+to typed_number() {
+  n = 0
+  try { n = number(trim(value(num_box))) } catch { n = 0 }
+  n
+}
+
+to mark_done() {
+  id = typed_number()
+  if not has(tasks, id) {
+    set(note, "There is no task numbered " + text(id) + ".")
+    return
+  }
+  flags[id] = true
+  refresh()
+  save_tasks()
+  set(note, "Task " + text(id) + " is done.")
+}
+
+to delete_task() {
+  id = typed_number()
+  if not has(tasks, id) {
+    set(note, "There is no task numbered " + text(id) + ".")
+    return
+  }
+  remove(tasks, id)
+  remove(flags, id)
+  refresh()
+  save_tasks()
+  set(note, "Deleted task " + text(id) + ".")
+}
+
+to clear_done() {
+  if open_count() is length(tasks) {
+    set(note, "Nothing is done yet, so there is nothing to clear.")
+    return
+  }
+  if not ask("Remove every finished task?", "Bolo Tasks") { return }
+  removed = 0
+  for id in keys(tasks) {
+    if get(flags, id, false) {
+      remove(tasks, id)
+      remove(flags, id)
+      removed = removed + 1
+    }
+  }
+  refresh()
+  save_tasks()
+  set(note, "Removed " + text(removed) + " finished task(s).")
+}
+
+
+# --- the window ---------------------------------------------------------
+
+win = window("Bolo Tasks", 640, 690)
+heading(win, "Tasks")
+label(win, "A whole app in one Bolo file. Your list saves itself.")
+
+entry = input(win)
+add_bar = row(win)
+add_btn = button(add_bar, "Add task", { add_task() })
+
+label(win, " ")
+list_box = textbox(win, 13)
+
+status = label(win, "")
+note = label(win, "Ready.")
+
+label(win, "Task number:")
+pick_bar = row(win)
+num_box = input(pick_bar)
+done_btn = button(pick_bar, "Done", { mark_done() })
+delete_btn = button(pick_bar, "Delete", { delete_task() })
+
+foot = row(win)
+clear_btn = button(foot, "Clear done", { clear_done() })
+save_btn = button(foot, "Save now", { save_tasks() })
+quit_btn = button(foot, "Quit", { close(win) })
+
+load_tasks()
+refresh()
+show(win)

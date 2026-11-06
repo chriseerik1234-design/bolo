@@ -8,6 +8,7 @@ app_sandbox/
 coder_sandbox/
 bolo_progress.json
 bolo_crash.txt
+tasks.json
 
 # Installer build output (rebuild with installer/build.ps1)
 installer/.build/

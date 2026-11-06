@@ -50,7 +50,8 @@ It is a small desktop app built around the language:
   and *Show answer* is there when you want to see a working solution.
 - **An editor** with syntax colours, Run and Check buttons, and `F5` to run.
 - **App Studio**, where you write a program and open it as a real desktop
-  window. Five ready templates: Hello, Greeter, Tip calculator, Notes, Clock.
+  window. Six ready templates: Hello, Greeter, Tip calculator, Notes, To-do
+  list, Clock.
 - **A playground** with one live session, so variables survive between runs.
 - **A tutor** running locally through Ollama. It knows Bolo, can see the
   lesson and your code, and never sends anything to the internet.
@@ -531,7 +532,28 @@ Ready to run:
 ```bat
 bolo examples\hello_app.bolo
 bolo examples\notes_app.bolo
+bolo examples\tasks_app.bolo
 ```
+
+### A complete app in one Bolo file
+
+`examples\tasks_app.bolo` is a working to-do list: add tasks, tick them off,
+delete by number, clear finished ones, and it saves itself to `tasks.json`.
+Double-click **`BOLO - Tasks.bat`** to try it.
+
+What makes it a real program, in about 170 lines of Bolo:
+
+- a **table** for the words and another for the done marks
+- a **number** kept in `state["next"]` so ids never repeat
+- **functions** for the screen (`refresh`), the buttons (`add_task`,
+  `mark_done`, `delete_task`) and the file (`save_tasks`, `load_tasks`)
+- `try` / `catch` around saving, so a read-only folder shows a message
+  instead of crashing
+- `json` and `to_json` for the saved list
+- `ask(...)` before clearing finished tasks
+
+None of it is a special case in the engine; every line uses the same builtins
+the lessons teach.
 
 ## The local tutor
 

@@ -17,8 +17,8 @@ Everything happens by double-clicking.
       Curious? "Playground" runs code in one live session, so the names
       you make stay around.
       Making an app? "App Studio" opens your program as a real window,
-      with five templates ready to try: Hello, Greeter, Tip calculator,
-      Notes and Clock.
+      with six templates ready to try: Hello, Greeter, Tip calculator,
+      Notes, To-do list and Clock.
       Want a helper? "Ask the tutor" uses a local AI (Ollama) that knows
       Bolo and can see the lesson and your code. Nothing leaves your
       computer.
@@ -49,6 +49,17 @@ Everything happens by double-clicking.
       It talks only to Ollama on this computer. Nothing is sent to the
       internet.
 
+  BOLO - Tasks.bat
+      A finished app, written entirely in Bolo: a to-do list.
+
+      Type a task and press "Add task". The number on the left is what
+      you type in the "Task number" box to press Done or Delete.
+      "Clear done" removes every finished task after asking first.
+      Your list is saved to tasks.json in this folder, so it is still
+      there next time. Open examples\tasks_app.bolo to read it: the whole
+      program is Bolo, and it uses tables, functions, loops, try/catch
+      and JSON.
+
   START - Type Code Live.bat
       A quick live prompt for experiments outside the app.
       Try:   say("hello")
@@ -78,7 +89,7 @@ What is in this folder
   bolo.py                 the engine (Python). You never edit this.
   bolo.cmd                starts the engine from a terminal.
   learn\                  the eight plain-file lessons and the challenges.
-  examples\               finished programs to look at, including two apps.
+  examples\               finished programs to look at, including three apps.
   ollama\                 the recipes for the local Bolo models.
   tests\                  174 automatic checks that Bolo and the apps work.
   README.md               the full language reference, for later.

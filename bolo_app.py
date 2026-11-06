@@ -1482,6 +1482,40 @@ APP_TEMPLATES: list[tuple[str, str]] = [
         'show(win)\n',
     ),
     (
+        "To-do list",
+        'win = window("To-do list", 520, 470)\n'
+        'heading(win, "My tasks")\n'
+        'items = table()\n'
+        'counter = table("next", 1)\n'
+        '\n'
+        'to show_tasks() {\n'
+        '  out = ""\n'
+        '  for id in sort(keys(items)) {\n'
+        '    out = out + text(id) + ". " + items[id] + "\\n"\n'
+        '  }\n'
+        '  if out is "" { out = "Nothing yet. Add one below." }\n'
+        '  out\n'
+        '}\n'
+        '\n'
+        'entry = input(win)\n'
+        'bar = row(win)\n'
+        'board = textbox(win, 10)\n'
+        'button(bar, "Add", {\n'
+        '  words = trim(value(entry))\n'
+        '  if words is "" {\n'
+        '    alert("Type a task first.")\n'
+        '  } else {\n'
+        '    id = counter["next"]\n'
+        '    items[id] = words\n'
+        '    counter["next"] = id + 1\n'
+        '    set(entry, "")\n'
+        '    set(board, show_tasks())\n'
+        '  }\n'
+        '})\n'
+        'button(bar, "Quit", { close(win) })\n'
+        'show(win)\n',
+    ),
+    (
         "Clock",
         'win = window("Clock", 420, 280)\n'
         'heading(win, "Tick")\n'

@@ -121,5 +121,13 @@ class PlaygroundChecks(unittest.TestCase):
         self.assertFalse((APP_DIR / "note.txt").exists())
 
 
+class AppTemplateChecks(unittest.TestCase):
+    def test_every_app_template_parses(self) -> None:
+        self.assertGreaterEqual(len(bolo_app.APP_TEMPLATES), 5)
+        for name, code in bolo_app.APP_TEMPLATES:
+            with self.subTest(template=name):
+                bolo.parse(code)
+
+
 if __name__ == "__main__":
     unittest.main()

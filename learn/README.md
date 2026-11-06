@@ -122,7 +122,8 @@ ones:
   ```
 
   Run `bolo examples\hello_app.bolo` to try one, or open **App Studio** in the
-  learning app. `examples\notes_app.bolo` opens and saves text files.
+  learning app. `examples\notes_app.bolo` opens and saves text files, and
+  `examples\tasks_app.bolo` is a complete to-do app that saves itself.
 - **Ask the tutor.** The learning app's Tutor page uses a local Ollama model.
   It can explain an error, give a hint, or check your code. Nothing is sent to
   the internet.
