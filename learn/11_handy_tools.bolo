@@ -1,0 +1,32 @@
+# Lesson 11 - handy everyday tools
+#
+# Run this file with:     bolo learn\11_handy_tools.bolo
+#
+# Small tools with plain names: numbered, empty, clamp, between.
+
+names = ["Ava", "Ben", "Cora"]
+
+if empty(names) {
+  say("no names")
+} otherwise {
+  for n, name in numbered(names) {
+    say(text(n) + ". " + name)
+  }
+}
+
+say("---")
+say(clamp(15, 1, 10))
+say(clamp(-2, 1, 10))
+
+age = 16
+if between(age, 13, 19) {
+  say("teen")
+}
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Change clamp(15, 1, 10) to keep a different number in bounds.
+# 2. Test between with an age that is not a teen.
+# 3. Start with an empty list and show the "no names" message.
+# ---------------------------------------------------------------

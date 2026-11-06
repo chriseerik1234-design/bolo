@@ -44,7 +44,7 @@ Double-click **`BOLO - Learn Bolo.bat`**. No terminal, nothing to install.
 
 It is a small desktop app built around the language:
 
-- **15 lessons**, from `say("hello")` to recursion, closures, regex, real
+- **18 lessons**, from `say("hello")` to recursion, closures, regex, real
   files, and a finished desktop app. Each one explains a piece of Bolo, gives
   you a task, and checks your answer. It says exactly what is still missing,
   and *Show answer* is there when you want to see a working solution.
@@ -533,6 +533,7 @@ Ready to run:
 bolo examples\hello_app.bolo
 bolo examples\notes_app.bolo
 bolo examples\tasks_app.bolo
+bolo examples\snake_app.bolo
 ```
 
 ### A complete app in one Bolo file

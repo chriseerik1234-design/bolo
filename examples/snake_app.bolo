@@ -1,0 +1,301 @@
+# snake_app.bolo - Snake, written entirely in Bolo.
+#
+# Run it from a terminal:
+#   bolo examples\snake_app.bolo
+# or double-click "BOLO - Snake.bat".
+#
+# Click the white box under the board, then steer with W A S D.
+# Space pauses. The edges wrap around, so there is no wall to hit.
+# Nothing leaves this computer.
+
+# --- the board ----------------------------------------------------------
+# The board is 20 squares wide and 15 tall. A square is two characters,
+# so it still looks like a square in the text box.
+cols = 20
+rows = 15
+
+# The snake is a table of body pieces. snake[0] is the head, and each
+# piece is a little list: [x, y]. Tables are used because a function may
+# change them in place; a plain name would only change inside that one
+# function.
+snake = table()
+
+state = table(
+  "alive", true,
+  "paused", false,
+  "won", false,
+  "dir", "right",
+  "next", "right",
+  "len", 3,
+  "score", 0,
+  "best", 0,
+  "speed", 260,
+  "food_x", 15,
+  "food_y", 8,
+  "running", false
+)
+
+
+# --- small helpers ------------------------------------------------------
+
+to opposite(d) {
+  if d is "up" { return "down" }
+  if d is "down" { return "up" }
+  if d is "left" { return "right" }
+  if d is "right" { return "left" }
+  ""
+}
+
+to speed_label() {
+  if state["speed"] >= 240 { return "1" }
+  if state["speed"] >= 200 { return "2" }
+  if state["speed"] >= 160 { return "3" }
+  if state["speed"] >= 120 { return "4" }
+  "5"
+}
+
+
+# --- food ---------------------------------------------------------------
+
+to place_food() {
+  if state["len"] >= cols * rows { return }
+
+  taken = table()
+  for i in range(state["len"]) {
+    piece = get(snake, i)
+    taken[text(piece[0]) + "," + text(piece[1])] = true
+  }
+
+  spot_x = 1
+  spot_y = 1
+  found = false
+  tries = 0
+  while not found and tries < 1000 {
+    spot_x = random_int(1, cols)
+    spot_y = random_int(1, rows)
+    if not has(taken, text(spot_x) + "," + text(spot_y)) {
+      found = true
+    }
+    tries = tries + 1
+  }
+  state["food_x"] = spot_x
+  state["food_y"] = spot_y
+}
+
+
+# --- drawing ------------------------------------------------------------
+
+to draw() {
+  cells = table()
+
+  for i in range(state["len"]) {
+    piece = get(snake, i)
+    cells[text(piece[0]) + "," + text(piece[1])] = " o "
+  }
+
+  head = get(snake, 0)
+  cells[text(head[0]) + "," + text(head[1])] = " @ "
+  cells[text(state["food_x"]) + "," + text(state["food_y"])] = " * "
+
+  out = "+" + repeat("-", cols * 3) + "+\n"
+  for y in range(1, rows + 1) {
+    line = "|"
+    for x in range(1, cols + 1) {
+      line = line + get(cells, text(x) + "," + text(y), "   ")
+    }
+    out = out + line + "|\n"
+  }
+  out = out + "+" + repeat("-", cols * 3) + "+"
+  set(board_box, out)
+
+  if state["won"] {
+    set(status, "You filled the whole board!  Score " +
+      text(state["score"]) + ".  Press Restart to play again.")
+  } else if not state["alive"] {
+    set(status, "Game over.  Score " + text(state["score"]) +
+      "   Best " + text(state["best"]) + ".  Press Restart.")
+  } else if state["paused"] {
+    set(status, "Paused.  Press Space or Pause to keep going.")
+  } else {
+    set(status, "Score " + text(state["score"]) +
+      "   Best " + text(state["best"]) +
+      "   Speed " + speed_label())
+  }
+}
+
+
+# --- moving -------------------------------------------------------------
+
+to turn(where) {
+  if not state["alive"] { return }
+  if state["paused"] { return }
+  if where is opposite(state["dir"]) { return }
+  state["next"] = where
+}
+
+to step() {
+  if not state["alive"] { return }
+  if state["paused"] { return }
+
+  state["dir"] = state["next"]
+  head = get(snake, 0)
+  nx = head[0]
+  ny = head[1]
+
+  if state["dir"] is "up" { ny = ny - 1 }
+  if state["dir"] is "down" { ny = ny + 1 }
+  if state["dir"] is "left" { nx = nx - 1 }
+  if state["dir"] is "right" { nx = nx + 1 }
+
+  # Edges wrap around instead of ending the game.
+  if nx < 1 { nx = cols }
+  if nx > cols { nx = 1 }
+  if ny < 1 { ny = rows }
+  if ny > rows { ny = 1 }
+
+  # The last piece moves out of the way, so it is not an obstacle.
+  hit = false
+  for i in range(state["len"] - 1) {
+    piece = get(snake, i)
+    if piece[0] is nx and piece[1] is ny { hit = true }
+  }
+  if hit {
+    state["alive"] = false
+    if state["score"] > state["best"] { state["best"] = state["score"] }
+    draw()
+    return
+  }
+
+  # Move every piece into the place of the one in front of it.
+  i = state["len"] - 1
+  while i > 0 {
+    snake[i] = get(snake, i - 1)
+    i = i - 1
+  }
+  snake[0] = [nx, ny]
+
+  if nx is state["food_x"] and ny is state["food_y"] {
+    state["len"] = state["len"] + 1
+    snake[state["len"] - 1] = get(snake, state["len"] - 2)
+    state["score"] = state["score"] + 1
+    if state["score"] > state["best"] { state["best"] = state["score"] }
+    if state["speed"] > 90 { state["speed"] = state["speed"] - 10 }
+    if state["len"] >= cols * rows {
+      state["alive"] = false
+      state["won"] = true
+    }
+    place_food()
+  }
+
+  draw()
+}
+
+# One tick moves the snake once, then asks the window for another tick.
+# Asking again (instead of every) lets the delay shrink as the score rises.
+to tick() {
+  state["running"] = false
+  if state["paused"] { return }
+  if not state["alive"] { return }
+  step()
+  if state["alive"] and not state["paused"] {
+    state["running"] = true
+    later(win, state["speed"], { tick() })
+  }
+}
+
+
+# --- starting over ------------------------------------------------------
+
+to reset_game() {
+  for key in keys(snake) { remove(snake, key) }
+  snake[0] = [10, 8]
+  snake[1] = [9, 8]
+  snake[2] = [8, 8]
+  state["alive"] = true
+  state["paused"] = false
+  state["won"] = false
+  state["dir"] = "right"
+  state["next"] = "right"
+  state["len"] = 3
+  state["score"] = 0
+  state["speed"] = 260
+  place_food()
+}
+
+to restart() {
+  was_running = state["running"]
+  reset_game()
+  draw()
+  if not was_running {
+    state["running"] = true
+    later(win, 500, { tick() })
+  }
+}
+
+to toggle_pause() {
+  if not state["alive"] { return }
+  state["paused"] = not state["paused"]
+  if not state["paused"] and not state["running"] {
+    state["running"] = true
+    later(win, state["speed"], { tick() })
+  }
+  draw()
+}
+
+
+# --- keys ---------------------------------------------------------------
+
+to steer() {
+  raw = value(key_box)
+  set(key_box, "")
+
+  # A space pauses, even if other spaces sneak in.
+  if contains(raw, " ") {
+    toggle_pause()
+    return
+  }
+
+  typed = lower(trim(raw))
+  if typed is "" { return }
+
+  # If several keys arrived together, use the last one.
+  key = take(typed, 1)
+  n = length(typed)
+  if n > 1 { key = typed[n - 1] }
+
+  if key is "w" { turn("up") }
+  if key is "a" { turn("left") }
+  if key is "s" { turn("down") }
+  if key is "d" { turn("right") }
+}
+
+
+# --- the window ---------------------------------------------------------
+
+win = window("Bolo Snake", 640, 660)
+heading(win, "Snake")
+label(win, "Click the white box, then steer with W A S D. Space pauses.")
+label(win, "If a button took the focus, click the white box again.")
+
+board_box = textbox(win, 17, false)
+status = label(win, "")
+
+label(win, "Type here:")
+key_box = input(win)
+on_change(key_box, { steer() })
+
+pad = row(win)
+button(pad, "Up", { turn("up") })
+button(pad, "Left", { turn("left") })
+button(pad, "Down", { turn("down") })
+button(pad, "Right", { turn("right") })
+button(pad, "Pause", { toggle_pause() })
+button(pad, "Restart", { restart() })
+button(pad, "Quit", { close(win) })
+
+reset_game()
+draw()
+
+state["running"] = true
+later(win, 700, { tick() })
+show(win)

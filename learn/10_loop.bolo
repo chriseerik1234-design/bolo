@@ -1,0 +1,34 @@
+# Lesson 10 - easy loops
+#
+# Run this file with:     bolo learn\10_loop.bolo
+#
+# "loop N times" does something a set number of times.
+# "stop" leaves a loop. "next" skips to the next turn.
+
+loop 3 times {
+  say("hello")
+}
+
+say("---")
+
+count = 0
+loop 6 times {
+  count = count + 1
+  if count is 2 { next }
+  if count is 6 { stop }
+  say(count)
+}
+
+say("---")
+
+for n, name in numbered(["Ali", "Bea", "Cal"]) {
+  say(text(n) + ". " + name)
+}
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Change loop 3 times to loop 5 times.
+# 2. Make the middle loop say only even numbers.
+# 3. Add your own name to the numbered list.
+# ---------------------------------------------------------------

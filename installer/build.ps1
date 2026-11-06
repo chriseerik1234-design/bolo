@@ -151,12 +151,19 @@ cd /d "%~dp0"
 start "" "%~dp0bolo.exe" "%~dp0examples\tasks_app.bolo"
 "@
 
+Write-TextFile (Join-Path $DistDir "Bolo Snake.bat") @"
+@echo off
+cd /d "%~dp0"
+start "" "%~dp0bolo.exe" "%~dp0examples\snake_app.bolo"
+"@
+
 Write-TextFile (Join-Path $DistDir "Start here.txt") @"
 Bolo is ready.
 
   Double-click "Bolo Learn.bat" to learn the language.
   Double-click "Bolo Chat.bat"  to talk with the local AI.
-  Double-click "Bolo Tasks.bat" to use a finished app written in Bolo.
+  Double-click "Bolo Tasks.bat" to use a to-do app written in Bolo.
+  Double-click "Bolo Snake.bat" to play a game written in Bolo.
 
 The AI parts need Ollama from https://ollama.com. Everything else works
 without it, including the whole language and the lessons.

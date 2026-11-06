@@ -1,0 +1,28 @@
+# Lesson 9 - keep values safe, and give answers back
+#
+# Run this file with:     bolo learn\09_keep.bolo
+#
+# "keep" stores a value that must not change.
+# "give" hands an answer back from a recipe (the same as "return").
+
+keep app_name = "Bolo"
+keep limit = 10
+
+say("App: " + app_name)
+say("Limit: " + text(limit))
+
+to check(n) {
+  if n > limit { give "too big" }
+  give "ok"
+}
+
+say(check(7))
+say(check(15))
+
+# ---------------------------------------------------------------
+# TRY IT
+#
+# 1. Add keep greeting = "Hello" and use it in a say line.
+# 2. Try changing app_name after it was kept. Read the message.
+# 3. Write a recipe that gives "even" or "odd" for a number.
+# ---------------------------------------------------------------

@@ -143,6 +143,8 @@ If you are publishing Bolo, edit `$Url at the top of installer\install.ps1
     New-Shortcut (Join-Path $startMenu "Bolo Chat.lnk") $chatExe $InstallDir
     New-Shortcut (Join-Path $startMenu "Bolo Tasks.lnk") $boloExe $InstallDir `
         "`"$InstallDir\examples\tasks_app.bolo`""
+    New-Shortcut (Join-Path $startMenu "Bolo Snake.lnk") $boloExe $InstallDir `
+        "`"$InstallDir\examples\snake_app.bolo`""
     Say "  Start Menu > Bolo" "Green"
 
     if (-not $NoDesktopShortcut) {
@@ -210,6 +212,7 @@ Write-Host "Bolo was removed." -ForegroundColor Green
     Write-Host "  Learn:  Start Menu > Bolo > Bolo Learn"
     Write-Host "  Chat:   Start Menu > Bolo > Bolo Chat"
     Write-Host "  Tasks:  Start Menu > Bolo > Bolo Tasks"
+    Write-Host "  Snake:  Start Menu > Bolo > Bolo Snake"
     Write-Host "  Code:   bolo learn\01_say.bolo   (in a new terminal)"
     Write-Host ""
     Write-Host "  The AI parts need Ollama: https://ollama.com" -ForegroundColor DarkGray

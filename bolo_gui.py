@@ -329,10 +329,11 @@ class Gui:
         return Widget(self, "input", widget, "input", var=var)
 
     def textbox(self, args: list) -> Widget:
-        _expect(args, 1, 2, "textbox")
+        _expect(args, 1, 3, "textbox")
         parent = args[0]
         lines = _number(args[1], "textbox lines") if len(args) > 1 else 6
         lines = max(2, min(lines, 40))
+        editable = truthy(args[2]) if len(args) > 2 else True
         container = self._container(parent, "textbox")
 
         frame = tk.Frame(
@@ -352,6 +353,8 @@ class Gui:
             pady=8,
             undo=True,
         )
+        if not editable:
+            body.configure(state="disabled", takefocus=0, cursor="arrow")
         scroll = tk.Scrollbar(frame, command=body.yview)
         body.configure(yscrollcommand=scroll.set)
         scroll.pack(side="right", fill="y")
@@ -421,8 +424,13 @@ class Gui:
         elif target.kind == "input":
             target.var.set(text)
         elif target.kind == "textbox":
+            was_disabled = str(target.body.cget("state")) == "disabled"
+            if was_disabled:
+                target.body.configure(state="normal")
             target.body.delete("1.0", "end")
             target.body.insert("1.0", text)
+            if was_disabled:
+                target.body.configure(state="disabled")
         elif target.kind == "check":
             target.var.set(truthy(value))
         else:
@@ -434,8 +442,13 @@ class Gui:
         target, value = args
         if not isinstance(target, Widget) or target.kind != "textbox":
             raise BoloError("add_line needs a textbox")
+        was_disabled = str(target.body.cget("state")) == "disabled"
+        if was_disabled:
+            target.body.configure(state="normal")
         target.body.insert("end", to_str(value) + "\n")
         target.body.see("end")
+        if was_disabled:
+            target.body.configure(state="disabled")
         return None
 
     def clear(self, args: list):
@@ -449,7 +462,12 @@ class Gui:
         elif target.kind == "input":
             target.var.set("")
         elif target.kind == "textbox":
+            was_disabled = str(target.body.cget("state")) == "disabled"
+            if was_disabled:
+                target.body.configure(state="normal")
             target.body.delete("1.0", "end")
+            if was_disabled:
+                target.body.configure(state="disabled")
         elif target.kind == "check":
             target.var.set(False)
         else:

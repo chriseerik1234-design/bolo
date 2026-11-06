@@ -122,9 +122,10 @@ def format_error(source: str, label: str, err: BoloError) -> str:
 # ---------------------------------------------------------------------------
 
 KEYWORDS = {
-    "to", "if", "else", "for", "in", "return",
+    "to", "if", "else", "otherwise", "for", "in", "return", "give",
     "and", "or", "not", "is", "true", "false", "nil", "nothing",
-    "while", "break", "continue", "try", "catch", "use",
+    "while", "break", "continue", "stop", "next", "try", "catch", "use",
+    "keep", "loop", "times",
 }
 TWO_CHAR_OPS = {"|>", "==", "!=", "<=", ">=", "->"}
 ONE_CHAR_OPS = set("+-*/%<>=()[]{},;")
@@ -331,6 +332,14 @@ class Assign:
 
 
 @dataclass
+class Keep:
+    name: str
+    value: Any
+    line: int = 0
+    col: int = 0
+
+
+@dataclass
 class ExprStmt:
     expr: Any
     line: int = 0
@@ -349,6 +358,14 @@ class For:
 @dataclass
 class While:
     cond: Any
+    body: list
+    line: int = 0
+    col: int = 0
+
+
+@dataclass
+class LoopTimes:
+    count: Any
     body: list
     line: int = 0
     col: int = 0
@@ -554,22 +571,27 @@ class Parser:
                 return self.parse_for()
             if word == "while":
                 return self.parse_while()
+            if word == "loop":
+                return self.parse_loop_times()
             if word == "try":
                 return self.parse_try()
             if word == "use":
                 return self.parse_use()
-            if word in ("break", "continue"):
+            if word == "keep":
+                return self.parse_keep()
+            if word in ("break", "continue", "stop", "next"):
                 start = self.advance()
-                node = Break if word == "break" else Continue
-                return node(start.line, start.col)
-            if word == "return":
+                if word in ("break", "stop"):
+                    return Break(start.line, start.col)
+                return Continue(start.line, start.col)
+            if word in ("return", "give"):
                 start = self.advance()
                 if self.at_nl() or self.at_op(";") or self.at_op("}") or self.eof():
                     return Return(None, start.line, start.col)
                 return Return(self.parse_expr(), start.line, start.col)
             if word == "if":
                 return ExprStmt(self.parse_if(), tok.line, tok.col)
-            if word in ("and", "or", "else", "in", "is", "catch"):
+            if word in ("and", "or", "else", "in", "is", "catch", "times"):
                 raise BoloError(f"unexpected '{word}'", tok.line, tok.col)
 
         if tok.kind == "op" and tok.value == "=":
@@ -671,6 +693,24 @@ class Parser:
         body = self.parse_block()
         return While(cond, body, start.line, start.col)
 
+    def parse_loop_times(self) -> LoopTimes:
+        start = self.expect_kw("loop")
+        self.skip_newlines()
+        count = self.parse_expr()
+        self.skip_newlines()
+        self.expect_kw("times")
+        self.skip_newlines()
+        body = self.parse_block()
+        return LoopTimes(count, body, start.line, start.col)
+
+    def parse_keep(self) -> Keep:
+        start = self.expect_kw("keep")
+        name = self.expect_name("a name for this kept value").value
+        self.expect_op("=")
+        self.skip_newlines()
+        value = self.parse_expr()
+        return Keep(name, value, start.line, start.col)
+
     def parse_try(self) -> Try:
         start = self.expect_kw("try")
         self.skip_newlines()
@@ -728,12 +768,12 @@ class Parser:
         then = self.parse_block()
         otherwise = None
 
-        # `else` may start on the next line, but a plain newline must stay
+        # `else`/`otherwise` may start on the next line, but a plain newline must stay
         # put so the statement/block terminator rules still see it.
         k = 0
         while self.peek(k).kind == "nl":
             k += 1
-        if self.peek(k).kind == "kw" and self.peek(k).value == "else":
+        if self.peek(k).kind == "kw" and self.peek(k).value in ("else", "otherwise"):
             self.i += k
             self.advance()
             self.skip_newlines()
@@ -1002,6 +1042,7 @@ class Table:
 class Env:
     def __init__(self, parent: "Env | None" = None):
         self.vars: dict[str, Any] = {}
+        self.consts: set[str] = set()
         self.parent = parent
 
     def get(self, name: str, line: int | None = None, col: int | None = None):
@@ -1021,8 +1062,26 @@ class Env:
             hint = "a name only exists after you give it a value, like:  score = 10"
         raise BoloError(f"I don't know the name '{name}'", line, col, hint)
 
-    def define(self, name: str, value) -> None:
+    def define(self, name: str, value, line: int | None = None,
+               col: int | None = None) -> None:
+        if name in self.consts:
+            raise BoloError(
+                f"'{name}' was kept and cannot be changed",
+                line, col,
+                "use a new name, or change 'keep' to a normal = if it should change",
+            )
         self.vars[name] = value
+
+    def define_const(self, name: str, value, line: int | None = None,
+                     col: int | None = None) -> None:
+        if name in self.consts:
+            raise BoloError(
+                f"'{name}' is already kept",
+                line, col,
+                "pick a different name for this kept value",
+            )
+        self.vars[name] = value
+        self.consts.add(name)
 
 
 @dataclass
@@ -2093,6 +2152,65 @@ def _pairs(interp, args):
 
 # -- more text and list helpers --------------------------------------------
 
+@builtin("numbered")
+def _numbered(interp, args):
+    """numbered(xs) - pairs of [position, item], counting from 1."""
+    _check(args, 1, 1, "numbered")
+    subject = args[0]
+    if isinstance(subject, Table):
+        subject = list(subject.data.values())
+    elif isinstance(subject, str):
+        subject = list(subject)
+    elif not isinstance(subject, list):
+        raise BoloError(
+            f"numbered needs a list or text, got {describe_type(subject)}",
+            hint="for example:  for n, item in numbered([\"a\", \"b\"]) { ... }",
+        )
+    return [[i, item] for i, item in enumerate(subject, start=1)]
+
+
+@builtin("empty")
+def _empty(interp, args):
+    """empty(x) - true when a list, text or table has nothing in it."""
+    _check(args, 1, 1, "empty")
+    value = args[0]
+    if isinstance(value, (list, str)):
+        return len(value) == 0
+    if isinstance(value, Table):
+        return len(value.data) == 0
+    raise BoloError(
+        f"empty needs a list, text or table, got {describe_type(value)}",
+    )
+
+
+@builtin("clamp")
+def _clamp(interp, args):
+    """clamp(n, low, high) - keep a number between low and high."""
+    _check(args, 3, 3, "clamp")
+    n = _num(args[0], "clamp")
+    low = _num(args[1], "clamp")
+    high = _num(args[2], "clamp")
+    if low > high:
+        low, high = high, low
+    if n < low:
+        return low
+    if n > high:
+        return high
+    return n
+
+
+@builtin("between")
+def _between(interp, args):
+    """between(n, low, high) - true when n is from low to high, both allowed."""
+    _check(args, 3, 3, "between")
+    n = _num(args[0], "between")
+    low = _num(args[1], "between")
+    high = _num(args[2], "between")
+    if low > high:
+        low, high = high, low
+    return low <= n <= high
+
+
 @builtin("pad")
 def _pad(interp, args):
     """pad(s, width) - add spaces on the right until it is wide enough."""
@@ -2307,8 +2425,8 @@ class Interp:
             result = None
         except (BreakSignal, ContinueSignal):
             raise BoloError(
-                "'break' and 'continue' only work inside a loop",
-                hint="put them inside for or while",
+                "'stop' and 'next' only work inside a loop",
+                hint="put them inside for, while, or loop",
             ) from None
         gui = getattr(self, "gui", None)
         if gui is not None:
@@ -2332,7 +2450,11 @@ class Interp:
             return self.eval(node.expr, env)
         if isinstance(node, Assign):
             value = self.eval(node.value, env)
-            env.define(node.name, value)
+            env.define(node.name, value, node.line, node.col)
+            return value
+        if isinstance(node, Keep):
+            value = self.eval(node.value, env)
+            env.define_const(node.name, value, node.line, node.col)
             return value
         if isinstance(node, SetIndex):
             container = self.eval(node.target.obj, env)
@@ -2346,8 +2468,28 @@ class Interp:
                 raise
         if isinstance(node, FuncDef):
             fn = UserFunction(node.name, node.params, node.body, env)
-            env.define(node.name, fn)
+            env.define(node.name, fn, node.line, node.col)
             return fn
+        if isinstance(node, LoopTimes):
+            raw = self.eval(node.count, env)
+            if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+                raise BoloError(
+                    "loop needs a number of times, not " + describe_type(raw),
+                    node.line, node.col,
+                    "for example:  loop 5 times { say(\"hi\") }",
+                )
+            count = int(raw)
+            if count < 0:
+                count = 0
+            result = None
+            for _ in range(count):
+                try:
+                    result = self.exec_block(node.body, env)
+                except ContinueSignal:
+                    continue
+                except BreakSignal:
+                    break
+            return result
         if isinstance(node, For):
             items = self.eval(node.iterable, env)
             if isinstance(items, Table):

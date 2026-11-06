@@ -885,6 +885,182 @@ show(win)
         gui=True,
         code_must=["window(", "heading(", "input(", "button(", "set(", "value(", "show("],
     ),
+    Lesson(
+        id="16",
+        title="Keep it safe, give it back",
+        subtitle="values that must not change, and clear answers",
+        body="""## A value that stays put
+
+Some names should never change: a game size, an app name, a price list.
+Use `keep` instead of `=`.
+
+    keep board_size = 20
+    keep app_name = "Snake"
+
+If the code tries to change a kept name later, Bolo stops and explains why.
+That saves you from accidents.
+
+## Giving an answer back
+
+Inside a recipe, the last line is the answer. You can also leave early
+with `give` (it means the same as `return`).
+
+    to bigger(a, b) {
+      if a > b { give a }
+      give b
+    }
+
+`say(bigger(9, 4))`  ->  `9`
+
+`give` is handy when you know the answer before the end, or when you want
+to say "stop here" in plain words.""",
+        task=(
+            "Keep a name called limit with the value 10. Make a recipe "
+            "called check that takes n and gives \"ok\" when n is not more than limit, "
+            "and otherwise gives \"too big\". Say check(7) and check(15)."
+        ),
+        starter="""keep limit = 10
+
+to check(n) {
+  # give "ok" when n is small enough
+  # otherwise give "too big"
+}
+
+say(check(7))
+say(check(15))
+""",
+        must=["ok", "too big"],
+        solution="""keep limit = 10
+
+to check(n) {
+  if n > limit { give "too big" }
+  give "ok"
+}
+
+say(check(7))
+say(check(15))
+""",
+        sandbox=False,
+        code_must=["keep", "give"],
+    ),
+    Lesson(
+        id="17",
+        title="Easy loops",
+        subtitle="loop N times, stop, and next",
+        body="""## Do it a set number of times
+
+When you know how many times, `loop` reads like English:
+
+    loop 3 times {
+      say("hello")
+    }
+
+That says hello three times. No counting box to set up.
+
+## Stop, or skip ahead
+
+Inside any loop you can:
+
+- `stop` — leave the loop right now (`break` means the same)
+- `next` — skip to the next turn (`continue` means the same)
+
+    n = 0
+    loop 5 times {
+      n = n + 1
+      if n is 3 { next }
+      if n is 5 { stop }
+      say(n)
+    }
+
+This says 1, 2, 4. It skips 3, and it stops before saying 5.
+
+## When you also need the number
+
+Use `for` with `range` or `numbered`:
+
+    for n, name in numbered(["Ali", "Bea", "Cal"]) {
+      say(text(n) + ". " + name)
+    }""",
+        task=(
+            "Use loop 5 times. Count up in a box, skip 2, stop when the count "
+            "reaches 5, and say the other numbers. The program should say 1, 3, 4."
+        ),
+        starter="""count = 0
+loop 5 times {
+  count = count + 1
+  # skip 2, stop at 5, and say the rest
+}
+""",
+        must=["1", "3", "4"],
+        solution="""count = 0
+loop 5 times {
+  count = count + 1
+  if count is 2 { next }
+  if count is 5 { stop }
+  say(count)
+}
+""",
+        sandbox=False,
+        code_must=["loop", "times"],
+    ),
+    Lesson(
+        id="18",
+        title="Handy everyday tools",
+        subtitle="numbered, empty, clamp, and between",
+        body="""## A few tools that save a lot of code
+
+Real programs use small checks all the time. Bolo gives them plain names.
+
+### Count items with numbers
+
+    for n, fruit in numbered(["apple", "pear"]) {
+      say(text(n) + ". " + fruit)
+    }
+
+`numbered` gives `[position, item]` pairs, counting from 1.
+
+### Is there anything inside?
+
+    if empty(cart) {
+      say("Your cart is empty.")
+    }
+
+`empty` is true for an empty list, text, or table.
+
+### Keep a number in bounds
+
+    volume = clamp(volume, 0, 100)
+
+`clamp(n, low, high)` never lets a number go below `low` or above `high`.
+
+### Is it in a range?
+
+    if between(age, 13, 19) { say("teen") }
+
+`between(n, low, high)` is true when `n` is from `low` to `high`.""",
+        task=(
+            "Make a list of three names. If the list is not empty, say each one "
+            "with its number using numbered. Then say clamp(15, 1, 10)."
+        ),
+        starter="""names = ["Ava", "Ben", "Cora"]
+
+# if the list is not empty, number and say each name
+# then say clamp(15, 1, 10)
+""",
+        must=["1. Ava", "2. Ben", "3. Cora", "10"],
+        solution="""names = ["Ava", "Ben", "Cora"]
+
+if not empty(names) {
+  for n, name in numbered(names) {
+    say(text(n) + ". " + name)
+  }
+}
+
+say(clamp(15, 1, 10))
+""",
+        sandbox=False,
+        code_must=["numbered", "empty", "clamp"],
+    ),
 ]
 
 
@@ -928,18 +1104,28 @@ REFERENCE: list[tuple[str, list[tuple[str, str, str]]]] = [
             ),
             (
                 "function  to name(...) { }",
-                "Teach Bolo a trick. The last line of the body is the answer; `return` leaves early. Functions can call themselves.",
-                "to greet(who) {\n  \"Hello, \" + who + \"!\"\n}\nsay(greet(\"Mari\"))",
+                "Teach Bolo a trick. The last line of the body is the answer; `give` (or `return`) leaves early. Functions can call themselves.",
+                "to greet(who) {\n  \"Hello, \" + who + \"!\"\n}\nsay(greet(\"Mari\"))\n\nto bigger(a, b) {\n  if a > b { give a }\n  give b\n}",
             ),
             (
-                "if / else",
-                "Ask a yes/no question and run a block when it is true. if is an expression, so it can produce a value.",
-                'if age < 18 { say("young") } else { say("grown up") }\n\nlabel = if n is 1 { "one" } else { "many" }',
+                "keep name = value",
+                "Store a value that must not change. If code tries to change it later, Bolo explains the problem.",
+                "keep pi = 3.14159\nkeep app_name = \"Tasks\"\nsay(app_name)",
+            ),
+            (
+                "if / else / otherwise",
+                "Ask a yes/no question and run a block when it is true. `otherwise` means the same as `else`. if is an expression, so it can produce a value.",
+                'if age < 18 { say("young") } otherwise { say("grown up") }\n\nlabel = if n is 1 { "one" } else { "many" }',
             ),
             (
                 "for",
-                "Run a block once for each item. The loop box exists only inside the loop.",
-                "for fruit in [\"apple\", \"pear\"] {\n  say(fruit)\n}",
+                "Run a block once for each item. The loop box exists only inside the loop. Use `numbered(xs)` when you also want the position.",
+                "for fruit in [\"apple\", \"pear\"] {\n  say(fruit)\n}\n\nfor n, fruit in numbered([\"apple\", \"pear\"]) {\n  say(text(n) + \". \" + fruit)\n}",
+            ),
+            (
+                "loop  N times",
+                "Do something a set number of times. The easiest loop when you already know how many times.",
+                'loop 3 times {\n  say("hello")\n}',
             ),
             (
                 "positions  xs[i]",
@@ -962,9 +1148,9 @@ REFERENCE: list[tuple[str, list[tuple[str, str, str]]]] = [
                 'n = 3\nwhile n > 0 {\n  say(n)\n  n = n - 1\n}',
             ),
             (
-                "break / continue",
-                "break leaves the loop now. continue jumps to the next step and skips the rest of the body.",
-                'for n in [1, 2, 3, 4] {\n  if n is 2 { continue }\n  if n is 4 { break }\n  say(n)\n}',
+                "break / continue   (also: stop / next)",
+                "`stop` leaves the loop now. `next` skips to the next step. `break` and `continue` mean the same thing.",
+                'for n in [1, 2, 3, 4] {\n  if n is 2 { next }\n  if n is 4 { stop }\n  say(n)\n}',
             ),
             (
                 "try / catch",
@@ -1281,6 +1467,16 @@ REFERENCE: list[tuple[str, list[tuple[str, str, str]]]] = [
                 "One [key, value] list per entry. Use it to walk a table.",
                 'for key, value in pairs(person) {\n  say(key, "=", value)\n}',
             ),
+            (
+                "numbered(xs)",
+                "One [position, item] list per item, counting from 1. Use it when you need the place and the value.",
+                'for n, item in numbered(["tea", "cake"]) {\n  say(text(n) + ". " + item)\n}',
+            ),
+            (
+                "empty(x)",
+                "True when a list, text or table has nothing in it.",
+                'empty([])        # true\nempty("hi")      # false',
+            ),
         ],
     ),
     (
@@ -1293,6 +1489,8 @@ REFERENCE: list[tuple[str, list[tuple[str, str, str]]]] = [
             ("average(xs)   also: mean", "The sum divided by the count.", 'average([2, 4, 6]) # 4'),
             ("random()", "A decimal from 0 up to (not including) 1.", 'chance = random()   # 0.731...'),
             ("random_int(a, b)", "A whole number from a to b, both ends allowed.", 'dice = random_int(1, 6)'),
+            ("clamp(n, low, high)", "Keep a number between low and high. Too small becomes low, too big becomes high.", "clamp(12, 1, 10)      # 10"),
+            ("between(n, low, high)", "True when n is from low to high, both allowed.", 'if between(age, 13, 19) { say("teen") }'),
             ("choose(xs)", "Pick one item at random.", 'say(choose(["rock", "paper", "scissors"]))'),
             ("now() / today()", "The date and time here, as text.", 'say(now())    # 2026-11-05 14:03:22\nsay(today())  # 2026-11-05'),
             ("sleep(seconds)", "Wait, then carry on. Whole and decimal seconds both work.", 'sleep(0.5)'),

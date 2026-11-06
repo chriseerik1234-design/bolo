@@ -3,9 +3,9 @@
 No experience needed. If you can read, type, and follow a recipe, you can do this.
 
 > Prefer a window to a terminal? Double-click **`BOLO - Learn Bolo.bat`** in the
-> project folder. The app has 15 lessons, an editor, Run and Check buttons, an
+> project folder. The app has 18 lessons, an editor, Run and Check buttons, an
 > App Studio for building real desktop windows, a local tutor, a playground, and
-> a searchable reference. These eight files are the same course in reading form.
+> a searchable reference. These files are the same course in reading form.
 
 ---
 
@@ -56,6 +56,9 @@ bolo> quit
 | 6 | `06_repeat.bolo` | Doing the same thing to every item |
 | 7 | `07_recipes.bolo` | Teaching the computer a new trick |
 | 8 | `08_real_job.bolo` | A real chore: files on your disk |
+| 9 | `09_keep.bolo` | Values that must not change, and `give` |
+| 10 | `10_loop.bolo` | `loop N times`, `stop`, and `next` |
+| 11 | `11_handy_tools.bolo` | `numbered`, `empty`, `clamp`, `between` |
 
 Work through them in order. Each takes about five minutes. Every lesson ends
 with a **Try it** section — do those, they are where the learning happens.
@@ -68,18 +71,21 @@ with a **Try it** section — do those, they are where the learning happens.
 | `"hello"` | text (always inside quotes) |
 | `42`, `3.14` | numbers (no quotes) |
 | `x = 5` | put the value 5 into a box named `x` |
+| `keep x = 5` | put a value in a box that must not change |
 | `true` / `false` | yes / no |
 | `nothing` | "no value at all" |
-| `if ... { } else { }` | if this is true, do that; otherwise do the other thing |
+| `if ... { } otherwise { }` | if this is true, do that; otherwise do the other thing (`else` also works) |
 | `is`, `is not` | same as `==` and `!=`, but reads like English |
 | `for x in list { }` | do this once for each item |
+| `loop 3 times { }` | do this a set number of times |
 | `while ... { }` | keep doing this while something stays true |
-| `break` / `continue` | leave the loop now / skip to the next step |
+| `stop` / `next` | leave the loop now / skip to the next step (`break`/`continue` also work) |
 | `try ... catch` | try something, and do this instead if it fails |
 | `table(...)` | a labelled box with many shelves: values kept under names |
 | `{name}` inside text | put a value into a sentence |
 | `use "file.bolo"` | run another file and keep its tricks |
 | `to name(...) { }` | teach the computer a new trick |
+| `give` / `return` | hand an answer back and stop the recipe |
 | `\|>` | "then": pass the left side into the right side |
 | `{ it * 2 }` | a small unnamed trick; `it` is whatever you hand it |
 | `#` | the rest of the line is a note for humans |

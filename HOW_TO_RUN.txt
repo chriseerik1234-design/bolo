@@ -8,7 +8,7 @@ Everything happens by double-clicking.
   BOLO - Learn Bolo.bat        <-- START HERE
       Opens the learning app: a proper window with a code editor.
 
-      It has 15 short lessons that start from nothing. Read the lesson
+      It has 18 short lessons that start from nothing. Read the lesson
       at the top, type your answer in the box, press Run. Then press
       Check - it tells you whether the task is really done, and what is
       still missing. Lesson 15 builds a real desktop app.
@@ -50,7 +50,7 @@ Everything happens by double-clicking.
       internet.
 
   BOLO - Tasks.bat
-      A finished app, written entirely in Bolo: a to-do list.
+      A finished to-do app, written entirely in Bolo.
 
       Type a task and press "Add task". The number on the left is what
       you type in the "Task number" box to press Done or Delete.
@@ -59,6 +59,14 @@ Everything happens by double-clicking.
       there next time. Open examples\tasks_app.bolo to read it: the whole
       program is Bolo, and it uses tables, functions, loops, try/catch
       and JSON.
+
+  BOLO - Snake.bat
+      A Snake game, written entirely in Bolo.
+
+      Click the "Type here" box, then steer with W A S D. Space pauses.
+      The edges wrap around, food makes the snake grow and speed up,
+      and the board is drawn with plain window widgets. Open
+      examples\snake_app.bolo to read it.
 
   START - Type Code Live.bat
       A quick live prompt for experiments outside the app.
