@@ -82,9 +82,9 @@ install.ps1
 For a GitHub release:
 
 ```powershell
-gh release create v1.0 installer\Bolo-Windows.zip `
-  --title "Bolo 1.0" `
-  --notes "The first full release: loops, tables, try/catch, a chat app, and a one-command installer."
+gh release create v1.1 installer\Bolo-Windows.zip installer\install.ps1 `
+  --title "Bolo 1.1 - a complete app written in Bolo" `
+  --notes "A working to-do app in one Bolo file, plus the usual installer."
 ```
 
 Then edit the address in **two** places:
