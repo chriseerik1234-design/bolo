@@ -948,7 +948,7 @@ REFERENCE: list[tuple[str, list[tuple[str, str, str]]]] = [
             ),
             (
                 "text escapes",
-                "Inside text, \\n is a new line, \\\" is a quote, and \\\\ is a backslash.",
+                "Inside text, \\n is a new line, \\t a tab, \\\" is a quote, and \\\\ is a backslash. Every other backslash stays as typed, so a regex like \"\\d+\" or a path like \"C:\\Users\\Cli\" arrives intact. A folder starting with n, t or r still needs \\\\ (C:\\notes), or use forward slashes: C:/Users/Cli.",
                 'say("one\\ntwo")\nsay("she said \\"hi\\"")',
             ),
             (
@@ -1221,6 +1221,16 @@ REFERENCE: list[tuple[str, list[tuple[str, str, str]]]] = [
                 'delete("temp")',
             ),
             ("exists(p) / isfile(p) / isdir(p)", "Ask what is there before you act.", 'if isfile(p) { say("found it") }'),
+            (
+                "size(p)",
+                "How many bytes a file holds. A folder has no single size, so it asks for a file.",
+                'files("photos") |> sortby({ size(it) }) |> reverse |> take(3)',
+            ),
+            (
+                "modified(p)",
+                "When the file last changed, as text like 2026-11-05 14:03:22. Sorting that text sorts by age, because the year comes first.",
+                'files(".") |> sortby({ modified(it) }) |> first',
+            ),
             (
                 "name(p) / stem(p) / ext(p) / parent(p)",
                 "Pieces of a path. ext has no dot.",

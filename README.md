@@ -332,6 +332,12 @@ Write `{{` and `}}` for real braces. If what is inside is not a value — pasted
 JSON, a note, an unbalanced bracket — Bolo leaves the braces as ordinary text,
 so JSON can be written without escaping.
 
+A backslash only means something in front of `n`, `t`, `r`, `"`, `'` or another
+backslash. Every other backslash stays exactly as typed, so a regex like
+`test(name, "\d+")` and a path like `read("C:\Users\Cli\Desktop\list.csv")`
+work without doubling. A folder whose name starts with `n`, `t` or `r` still
+needs `\\` there (`C:\notes`), or write it with forward slashes: `C:/Users/Cli`.
+
 ### Problems you can catch
 
 `fail("message")` stops with a problem of your own. `try` catches it (and any
@@ -470,7 +476,9 @@ All builtins take their subject first, so they compose with `|>`.
 | `walk(folder?, pattern?)` | recursive |
 | `read(p)`, `write(p, text)`, `append(p, text)` | UTF-8; parents auto-created |
 | `move(p, to)`, `copy(p, to)`, `delete(p)`, `mkdir(p)` | |
-| `exists(p)`, `isfile(p)`, `isdir(p)` | |
+| `exists(p)`, `isfile(p)`, `isdir(p)` | | |
+| `size(p)` | bytes in a file |
+| `modified(p)` | when it last changed, as sortable text |
 | `name(p)`, `stem(p)`, `ext(p)`, `parent(p)` | `ext` has no dot: `"jpg"` |
 | `path(a, b, ...)` | join path parts safely |
 
